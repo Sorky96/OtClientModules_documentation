@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Guide to Creating OTClient Modules</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; background-color: #f4f4f4; color: #222; }
+    h1, h2, h3 { color: #005072; }
+    code, pre { background: #eee; padding: 2px 4px; border-radius: 4px; }
+    pre { padding: 1em; overflow-x: auto; border-left: 4px solid #005072; }
+    .section { margin-bottom: 3em; }
+  </style>
+</head>
+<body>
+  <h1>Complete Guide to Creating OTClient Modules</h1>
+
+  <div class="section">
+    <h2>What Are OTClient Modules?</h2>
+    <p>Modules in OTClient (OTC) are self-contained folders containing Lua logic and UI definition files (.lua and .otui) that extend the game's client functionality. Examples include hotkey bars, health trackers, battle lists, and custom UIs.</p>
+  </div>
+
+  <div class="section">
+    <h2>Folder Structure</h2>
+    <pre><code>modules/
+  your_module/
+    your_module.lua
+    your_module.otui
+    images/
+    styles/
+    other_scripts.lua
+    your_module.otmod
+</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>OTMod File (.otmod)</h2>
+    <p>Every module must include a .otmod file which defines its metadata:</p>
+    <pre><code>Module
+  name: "Your Module"
+  description: "Does something cool."
+  author: "Your Name"
+  sandboxed: true
+  dependencies: [ ]
+  scripts: ["your_module.lua"]
+  @onLoad: init()
+  @onUnload: terminate()
+</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>Lua Logic File (your_module.lua)</h2>
+    <pre><code>function init()
+  g_ui.loadUI("your_module.otui")
+  myWindow = g_ui.createWidget("MainWindow", rootWidget)
+end
+
+function terminate()
+  if myWindow then
+    myWindow:destroy()
+    myWindow = nil
+  end
+end</code></pre>
+    <p>This is the typical structure. g_ui.loadUI loads the visual design from your .otui file, and g_ui.createWidget instantiates the root widget.</p>
+  </div>
+
+  <div class="section">
+    <h2>OTUI Files and Attributes</h2>
+    <p>OTUI files define the visual layout and styling using a custom markup.</p>
+    <pre><code>MainWindow
+  id: myWindow
+  size: 300 200
+  text: "My Example"
+  @onClick: function() g_logger.info("Clicked window") end
+
+  Button
+    id: closeButton
+    text: "Close"
+    anchors.bottom: parent.bottom
+    @onClick: function() myWindow:destroy() end</code></pre>
+
+    <h3>Attribute Reference</h3>
+    <p>Detailed information on each supported OTUI attribute:</p>
+
+    <h4>Common Attributes</h4>
+    <ul>
+      <li><strong>id</strong>: Unique identifier used in Lua scripts to access the widget.</li>
+      <li><strong>size</strong>: Specifies width and height (e.g. <code>size: 100 20</code>).</li>
+      <li><strong>position</strong>: Relative position inside parent (e.g. <code>position: 20 30</code>).</li>
+      <li><strong>anchors</strong>: Determines how the widget is anchored to parent/sibling widgets. Can use <code>top</code>, <code>bottom</code>, <code>left</code>, <code>right</code>, or <code>fill</code>.</li>
+      <li><strong>margin</strong>: Adds spacing around the widget (top, right, bottom, left).</li>
+      <li><strong>padding</strong>: Adds inner spacing inside the widget's content box.</li>
+      <li><strong>visible</strong>: Boolean value determining if the widget is shown initially (e.g. <code>visible: false</code>).</li>
+      <li><strong>enabled</strong>: Boolean value that determines whether the widget can be interacted with.</li>
+      <li><strong>opacity</strong>: Value between 0 and 1 for transparency (e.g. <code>opacity: 0.5</code>).</li>
+    </ul>
+
+    <h4>Text Attributes</h4>
+    <ul>
+      <li><strong>text</strong>: Sets the displayed string inside the widget.</li>
+      <li><strong>text-align</strong>: Aligns text: <code>left</code>, <code>center</code>, <code>right</code>.</li>
+      <li><strong>text-offset</strong>: Offsets the text inside the widget box (e.g. <code>text-offset: 2 2</code>).</li>
+      <li><strong>text-auto-resize</strong>: If true, resizes the widget based on the text.</li>
+      <li><strong>font</strong>: Font style to use (e.g. <code>verdana-11px-rounded</code>).</li>
+      <li><strong>color</strong>: Text color (hex value or named color).</li>
+    </ul>
+
+    <h4>Image Attributes</h4>
+    <ul>
+      <li><strong>image-source</strong>: Path to an image file (relative to /images).</li>
+      <li><strong>image-rect</strong>: Clipping region for the image (x y width height).</li>
+      <li><strong>image-smooth</strong>: Boolean flag for smoothing image scale.</li>
+      <li><strong>icon</strong>: Path to a preset icon image.</li>
+    </ul>
+
+    <h4>Layout & Container Attributes</h4>
+    <ul>
+      <li><strong>layout</strong>: Defines how children are arranged (e.g. <code>verticalBox</code>, <code>horizontalBox</code>, <code>grid</code>).</li>
+      <li><strong>fit-children</strong>: Automatically resize parent to fit children (true/false).</li>
+      <li><strong>spacing</strong>: Spacing between child widgets in layout containers.</li>
+      <li><strong>auto-resize</strong>: Makes widget resize based on content changes.</li>
+    </ul>
+
+    <h4>Style & Border</h4>
+    <ul>
+      <li><strong>background-color</strong>: Sets widget background color.</li>
+      <li><strong>border</strong>: Defines border width and color (e.g. <code>1 #FFFFFF</code>).</li>
+      <li><strong>border-width</strong>: Individual control over each side.</li>
+      <li><strong>border-color</strong>: Color for each side of the border.</li>
+    </ul>
+
+    <h4>Event Handlers</h4>
+    <ul>
+      <li><strong>@onClick</strong>: Function called on click.</li>
+      <li><strong>@onHoverChange</strong>: Function when mouse hovers over/out.</li>
+      <li><strong>@onTextChange</strong>: Function when text inside widget changes.</li>
+      <li><strong>@onEnter</strong>: Function triggered when mouse enters the widget.</li>
+      <li><strong>@onLeave</strong>: Function triggered when mouse leaves the widget.</li>
+    </ul>
+  </div>
+<div class="section">
+    <h2>Advanced Tips & Tricks</h2>
+    <p><strong>Note on .lua Extensions in .otmod Files:</strong> In classic OTClient, script filenames in the <code>scripts:</code> array <em>must</em> include the <code>.lua</code> extension. However, in modern forks like <code>OTCv8</code>, the client automatically appends <code>.lua</code> if it's missing. Example:</p>
+    <pre><code>scripts: ["example.lua"]     -- always works
+scripts: ["example"]         -- works only in OTCv8 and similar forks</code></pre>
+    <p>For maximum compatibility across clients, always include the full filename with the <code>.lua</code> extension.</p>
+    <ul>
+      <li><strong>Use <code>fit-children: true</code></strong> on layout panels to allow auto-sizing for nested widgets.</li>
+      <li>Use <code>anchors.fill: parent</code> to make widgets automatically stretch and fit their container.</li>
+      <li>Combine <code>margin</code> and <code>padding</code> for clean spacing without needing nested panels.</li>
+      <li>Use <code>focusable: false</code> for labels or non-interactive elements to avoid them intercepting keyboard focus.</li>
+      <li>Manage widgets via their <code>id</code> in Lua: <code>myWidget = rootWidget:getChildById("myId")</code></li>
+      <li>Wrap groups of widgets in a Panel to allow toggling their visibility with one call.</li>
+      <li><strong>Use g_keyboard.bindKeyPress</strong> in Lua to create custom hotkeys inside your modules.</li>
+      <li>Leverage <code>UICreature</code> or <code>UIItem</code> for creature/item previews and inventory widgets.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Using Extended Opcodes</h2>
+    <p>Extended opcodes are a way to send and receive custom client-server messages that go beyond standard Tibia communication.</p>
+
+    <h3>Server-Side (Lua - TFS)</h3>
+    <pre><code>function onExtendedOpcode(player, opcode, buffer)
+  if opcode == 42 then
+    print("Received from client:", buffer)
+    player:sendExtendedOpcode(42, "response from server")
+  end
+  return true
+end</code></pre>
+
+    <h3>Client-Side (Lua - OTClient)</h3>
+    <pre><code>function init()
+  ProtocolGame.registerExtendedOpcode(42, onOpcode42)
+end
+
+function onOpcode42(protocol, opcode, buffer)
+  g_logger.info("Received: " .. buffer)
+end
+
+function sendMyOpcode()
+  if g_game.isOnline() then
+    g_game.sendExtendedOpcode(42, "hello from client")
+  end
+end</code></pre>
+
+    <p>This is useful for features like:</p>
+    <ul>
+      <li>Sending UI-triggered data to the server</li>
+      <li>Fetching JSON or structured responses from server</li>
+      <li>Triggering events like task updates, achievements, trackers</li>
+    </ul>
+  </div></body>
+</html>
