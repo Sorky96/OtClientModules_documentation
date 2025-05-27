@@ -1,4 +1,4 @@
-# Complete(WIP) Guide to Creating OTClient Modules
+# Complete Guide to Creating OTClient Modules
 
 ## What Are OTClient Modules?
 

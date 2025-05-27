@@ -19,158 +19,135 @@ modules/
 
 ## OTMod File (.otmod)
 
-Every module must include a .otmod file which defines its metadata and how it integrates with the client. Below is an example with detailed comments:
+Every module must include a .otmod file which defines its metadata:
 
 ```
 Module
-  name: "Your Module"                -- Display name of the module
-  description: "Does something cool." -- Description shown in module manager
-  author: "Your Name"                -- Attribution field
-  sandboxed: true                    -- Restricts global access for safety
-  dependencies: [ ]                  -- List of other modules this one depends on
-  scripts: ["your_module.lua"]       -- Lua scripts to load (OTCv8 can skip .lua)
-  @onLoad: init()                    -- Lua function to call when module loads
-  @onUnload: terminate()             -- Lua function to call on unload
+  name: "Your Module"
+  description: "Does something cool."
+  author: "Your Name"
+  sandboxed: true
+  dependencies: [ ]
+  scripts: ["your_module.lua"]
+  @onLoad: init()
+  @onUnload: terminate()
 ```
-
-Note: Modern forks like OTCv8 allow skipping .lua in script names, but it's recommended to always include it for compatibility.
 
 ## Lua Logic File (your_module.lua)
 
-This script contains the core logic that runs when your module is loaded or unloaded. The functions init() and terminate() are defined in your .otmod file and will be executed by the OTClient framework.
-
 ```
 function init()
-  -- Load the UI layout defined in your_module.otui
   g_ui.loadUI("your_module.otui")
-
-  -- Create a MainWindow widget and attach it to the root interface
   myWindow = g_ui.createWidget("MainWindow", rootWidget)
 end
 
 function terminate()
-  -- Always clean up your widgets when unloading the module
-  -- This ensures there are no memory leaks or duplicated windows
   if myWindow then
-    myWindow:destroy()  -- Destroy removes the widget from memory
-    myWindow = nil      -- Unset the reference to help garbage collection
+    myWindow:destroy()
+    myWindow = nil
   end
 end
 ```
 
-Explanation:
-
-- init() is called automatically when the module is loaded (as defined in @onLoad).
-
-- g_ui.loadUI() loads the .otui layout into memory.
-
-- g_ui.createWidget() instantiates the root widget.
-
-- terminate() is executed when unloading — this is where you destroy custom UI to avoid bugs or memory leaks.
-
-- :destroy() ensures the widget is removed from both the screen and memory — always pair this with myWidget = nil.
+This is the typical structure. g_ui.loadUI loads the visual design from your .otui file, and g_ui.createWidget instantiates the root widget.
 
 ## OTUI Files and Attributes
 
-OTUI files define the visual layout and styling of widgets using a custom markup format. Below is an example layout with inline comments.
+OTUI files define the visual layout and styling using a custom markup.
 
 ```
-MainWindow                             -- Main container window with title bar and close button
-  id: myWindow                          -- ID to reference this widget from Lua
-  size: 300 200                         -- Width and height
-  text: "My Example"                   -- Window title
-  @onClick: function()                 -- Click handler using inline Lua
-    g_logger.info("Clicked window")
-  end
+MainWindow
+  id: myWindow
+  size: 300 200
+  text: "My Example"
+  @onClick: function() g_logger.info("Clicked window") end
 
-  Button                               -- A child widget (indented under MainWindow)
-    id: closeButton                    -- Button's unique ID
-    text: "Close"                      -- Label on the button
-    anchors.bottom: parent.bottom     -- Anchor this button to bottom of parent
-    @onClick: function()               -- On click, close the parent window
-      myWindow:destroy()
-    end
+  Button
+    id: closeButton
+    text: "Close"
+    anchors.bottom: parent.bottom
+    @onClick: function() myWindow:destroy() end
 ```
 
 ### Attribute Reference
 
-These are the most commonly used attributes across OTUI widget types.
+Detailed information on each supported OTUI attribute:
 
 #### Common Attributes
 
-- id: Unique name to reference the widget from Lua.
+- id: Unique identifier used in Lua scripts to access the widget.
 
-- size: Format: width height, e.g. size: 100 20.
+- size: Specifies width and height (e.g. size: 100 20).
 
-- position: Manual placement within parent, e.g. position: 20 30.
+- position: Relative position inside parent (e.g. position: 20 30).
 
-- anchors: Anchor this widget relative to its parent or siblings. Can use top, bottom, left, right, or fill.
+- anchors: Determines how the widget is anchored to parent/sibling widgets. Can use top, bottom, left, right, or fill.
 
-- margin: Outside spacing. Can be single or multiple values: margin: 10 or margin: 5 10 5 10.
+- margin: Adds spacing around the widget (top, right, bottom, left).
 
-- padding: Inner spacing between the border and content.
+- padding: Adds inner spacing inside the widget's content box.
 
-- visible: Set to false to hide widget by default.
+- visible: Boolean value determining if the widget is shown initially (e.g. visible: false).
 
-- enabled: Set to false to disable interaction (e.g. greys out buttons).
+- enabled: Boolean value that determines whether the widget can be interacted with.
 
-- opacity: Value from 0 (transparent) to 1 (opaque).
+- opacity: Value between 0 and 1 for transparency (e.g. opacity: 0.5).
 
 #### Text Attributes
 
-- text: The label or string displayed inside the widget.
+- text: Sets the displayed string inside the widget.
 
-- text-align: left, center, right.
+- text-align: Aligns text: left, center, right.
 
-- text-offset: Shifts text inside widget, e.g. text-offset: 2 2.
+- text-offset: Offsets the text inside the widget box (e.g. text-offset: 2 2).
 
-- text-auto-resize: Auto-expand the widget to fit text.
+- text-auto-resize: If true, resizes the widget based on the text.
 
-- font: Font preset, e.g. verdana-11px-rounded.
+- font: Font style to use (e.g. verdana-11px-rounded).
 
-- color: Color of the text. Can be named or hex: #FFFFFF.
+- color: Text color (hex value or named color).
 
 #### Image Attributes
 
-- image-source: Path to image file (e.g. /images/myicon.png).
+- image-source: Path to an image file (relative to /images).
 
-- image-rect: Region of the image to display: x y width height.
+- image-rect: Clipping region for the image (x y width height).
 
-- image-smooth: Smooth image scaling (true/false).
+- image-smooth: Boolean flag for smoothing image scale.
 
-- icon: Named image from a sprite atlas.
+- icon: Path to a preset icon image.
 
 #### Layout & Container Attributes
 
-- layout: Controls layout of child widgets. Use verticalBox, horizontalBox, or grid.
+- layout: Defines how children are arranged (e.g. verticalBox, horizontalBox, grid).
 
-- fit-children: Automatically resize parent to match content.
+- fit-children: Automatically resize parent to fit children (true/false).
 
-- spacing: Sets spacing between children in layout containers.
+- spacing: Spacing between child widgets in layout containers.
 
-- auto-resize: Makes widget resize on content changes.
+- auto-resize: Makes widget resize based on content changes.
 
 #### Style & Border
 
-- background-color: Widget background color.
+- background-color: Sets widget background color.
 
-- border: Format: width color, e.g. 1 #FF0000.
+- border: Defines border width and color (e.g. 1 #FFFFFF).
 
-- border-width: Set border per side: border-width: 1 2 1 2.
+- border-width: Individual control over each side.
 
-- border-color: Set color per side: border-color: #000 #222 #000 #222.
+- border-color: Color for each side of the border.
 
 #### Event Handlers
 
-- @onClick: Executes when widget is clicked.
+- @onClick: Function called on click.
 
-- @onHoverChange: Triggers when mouse hovers in/out.
+- @onHoverChange: Function when mouse hovers over/out.
 
-- @onTextChange: Triggers when text value changes.
+- @onTextChange: Function when text inside widget changes.
 
-- @onEnter: Mouse enters widget.
+- @onEnter: Function triggered when mouse enters the widget.
 
-- @onLeave: Mouse leaves widget.
+- @onLeave: Function triggered when mouse leaves the widget.
 
 ## Advanced Tips & Tricks
 
@@ -201,66 +178,42 @@ For maximum compatibility across clients, always include the full filename with 
 
 ## Using Extended Opcodes
 
-Extended opcodes allow OTClient and the server to exchange custom messages, beyond the default protocol. They're extremely useful for adding features like UI-server communication, achievements, or custom task systems.
+Extended opcodes are a way to send and receive custom client-server messages that go beyond standard Tibia communication.
 
 ### Server-Side (Lua - TFS)
 
 ```
 function onExtendedOpcode(player, opcode, buffer)
-  -- Called automatically when client sends an extended opcode
   if opcode == 42 then
     print("Received from client:", buffer)
-
-    -- Respond back to the client using the same opcode
     player:sendExtendedOpcode(42, "response from server")
   end
   return true
 end
 ```
 
-Explanation: This function should be registered in TFS's creaturescripts.xml. You can define multiple opcodes and use buffer as the custom message content.
-
 ### Client-Side (Lua - OTClient)
 
 ```
 function init()
-  -- Register a client-side handler for opcode 42
   ProtocolGame.registerExtendedOpcode(42, onOpcode42)
 end
 
 function onOpcode42(protocol, opcode, buffer)
-  -- This is called when server sends an extended opcode 42
-  g_logger.info("Received from server: " .. buffer)
+  g_logger.info("Received: " .. buffer)
 end
 
 function sendMyOpcode()
-  -- Send data to the server only if connected
   if g_game.isOnline() then
     g_game.sendExtendedOpcode(42, "hello from client")
   end
 end
 ```
 
-Key Points:
+This is useful for features like:
 
-- ProtocolGame.registerExtendedOpcode: Registers a Lua function to handle server responses.
+- Sending UI-triggered data to the server
 
-- g_game.sendExtendedOpcode(opcode, buffer): Sends a custom message to the server.
+- Fetching JSON or structured responses from server
 
-- buffer can be plain text, JSON, CSV, or any string — it's your protocol.
-
-This is useful for implementing:
-
-- Sending form input (like task progression or preferences) to the server
-
-- Getting structured data back from the server (e.g. JSON tables)
-
-- Triggering backend logic (achievement unlocked, event joined, etc.)
-
-Tips:
-
-- Always verify g_game.isOnline() before sending opcodes
-
-- Use a unique opcode ID (between 1–255) to avoid conflicts
-
-- Consider using JSON.stringify / decode for structured messages
+- Triggering events like task updates, achievements, trackers
