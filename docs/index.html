@@ -23,84 +23,89 @@
   <div class="section">
     <h2>Folder Structure</h2>
     <pre><code>modules/
-  your_module/
-    your_module.lua
-    your_module.otui
-    images/
-    styles/
-    other_scripts.lua
-    your_module.otmod
+  hello_world/
+    hello_world.lua
+    hello_world.otui
+    hello_world.otmod
 </code></pre>
   </div>
 
-<div class="section">
-  <h2>OTMod File (.otmod)</h2>
-  <p>Every module must include a <code>.otmod</code> file which defines its metadata and how it integrates with the client. Below is an example with detailed comments:</p>
-  <pre><code>Module
-  name: "Your Module"                -- Display name of the module
-  description: "Does something cool." -- Description shown in module manager
-  author: "Your Name"                -- Attribution field
-  sandboxed: true                    -- Restricts global access for safety
-  dependencies: [ ]                  -- List of other modules this one depends on
-  scripts: ["your_module.lua"]       -- Lua scripts to load (OTCv8 can skip .lua)
-  @onLoad: init()                    -- Lua function to call when module loads
-  @onUnload: terminate()             -- Lua function to call on unload
-</code></pre>
-  <p>Note: Modern forks like <code>OTCv8</code> allow skipping <code>.lua</code> in script names, but it's recommended to always include it for compatibility.</p>
-</div>
+  <div class="section">
+    <h2>OTMod File (.otmod)</h2>
+    <p>Every module must include a <code>.otmod</code> file which defines its metadata and how it integrates with the client.</p>
+    <p><strong>Important:</strong> Some forks of OTClient require OTUI files to be listed under the <code>scripts:</code> array to ensure they are loaded. Always test if your <code>.otui</code> files need to be explicitly listed in <code>.otmod</code>.</p>
+    <pre><code>name: "hello_world"                 -- Name of the module
+description: "Displays a Hello World message on Ctrl+I"  -- Description
+author: "Your Name"                -- Who created it
+sandboxed: true                    -- Restricts global access
+scripts: ["hello_world.lua"]        -- Lua files to load
+autoload: true                     -- Load automatically
+autoload-priority: 1001            -- Load order priority
+@onLoad: init                      -- Lua function to run on load
+@onUnload: terminate               -- Lua function to run on unload</code></pre>
+  </div>
 
+  <div class="section">
+    <h2>Lua Logic File (hello_world.lua)</h2>
+    <p>This script binds Ctrl+I to toggle a small window with a Hello World message:</p>
+    <pre><code>local window = nil                 -- Global reference to the window
+local hotkey = nil                -- Reference to the bound hotkey
 
-<div class="section">
-  <h2>Lua Logic File (your_module.lua)</h2>
-  <p>This script contains the core logic that runs when your module is loaded or unloaded. The functions <code>init()</code> and <code>terminate()</code> are defined in your .otmod file and will be executed by the OTClient framework.</p>
-  <pre><code>function init()
-  -- Load the UI layout defined in your_module.otui
-  g_ui.loadUI("your_module.otui")
+function init()
+  g_ui.importStyle('hello_world.otui')         -- Load UI style definition
+  window = g_ui.createWidget('HelloWindow', rootWidget) -- Create the widget
+  window:hide()                                -- Start hidden
 
-  -- Create a MainWindow widget and attach it to the root interface
-  myWindow = g_ui.createWidget("MainWindow", rootWidget)
+  hotkey = g_keyboard.bindKeyPress('Ctrl+I', function() -- Bind Ctrl+I
+    toggleHelloWindow()
+  end)
 end
 
 function terminate()
-  -- Always clean up your widgets when unloading the module
-  -- This ensures there are no memory leaks or duplicated windows
-  if myWindow then
-    myWindow:destroy()  -- Destroy removes the widget from memory
-    myWindow = nil      -- Unset the reference to help garbage collection
+  if window then
+    window:destroy()             -- Remove the window
+    window = nil
+  end
+  if hotkey then
+    g_keyboard.unbindKeyPress('Ctrl+I') -- Unbind hotkey
+    hotkey = nil
+  end
+end
+
+function toggleHelloWindow()
+  if window and window:isVisible() then
+    window:hide()                -- Hide if visible
+  else
+    window:show()                -- Show if hidden
+    window:raise()               -- Bring to front
+    window:focus()               -- Focus it
   end
 end</code></pre>
-  <p><strong>Explanation:</strong></p>
-  <ul>
-    <li><code>init()</code> is called automatically when the module is loaded (as defined in <code>@onLoad</code>).</li>
-    <li><code>g_ui.loadUI()</code> loads the .otui layout into memory.</li>
-    <li><code>g_ui.createWidget()</code> instantiates the root widget.</li>
-    <li><code>terminate()</code> is executed when unloading — this is where you destroy custom UI to avoid bugs or memory leaks.</li>
-    <li><code>:destroy()</code> ensures the widget is removed from both the screen and memory — always pair this with <code>myWidget = nil</code>.</li>
-  </ul>
-</div>
+  </div>
 
+  <div class="section">
+    <h2>OTUI File (hello_world.otui)</h2>
+    <p>This defines a simple window named <code>HelloWindow</code> with a label inside it:</p>
+    <pre><code>HelloWindow < MainWindow        -- Inherit from MainWindow style
+  id: HelloWindow               -- ID used in Lua
+  size: 200 100                 -- Width and height
+  text: "Hello"                -- Window title
+  draggable: true              -- Allow window to be dragged
+  visible: false               -- Start hidden
 
-
-<div class="section">
-  <h2>OTUI Files and Attributes</h2>
-  <p>OTUI files define the visual layout and styling of widgets using a custom markup format. Below is an example layout with inline comments.</p>
-  <pre><code>MainWindow                             -- Main container window with title bar and close button
-  id: myWindow                          -- ID to reference this widget from Lua
-  size: 300 200                         -- Width and height
-  text: "My Example"                   -- Window title
-  @onClick: function()                 -- Click handler using inline Lua
-    g_logger.info("Clicked window")
-  end
-
-  Button                               -- A child widget (indented under MainWindow)
-    id: closeButton                    -- Button's unique ID
-    text: "Close"                      -- Label on the button
-    anchors.bottom: parent.bottom     -- Anchor this button to bottom of parent
-    @onClick: function()               -- On click, close the parent window
-      myWindow:destroy()
-    end
-</code></pre>
-
+  Label                        -- Child label inside window
+    id: HelloLabel             -- Label ID
+    anchors.centerIn: parent  -- Center in window
+    text: "Hello, World!"     -- Text displayed
+    color: #00A               -- Text color
+    font: verdana-11px-rounded -- Font style</code></pre>
+  </div>
+    <p>Download a working example module:</p>
+    <ul>
+      <li><a href="https://github.com/Sorky96/OtClientModules_documentation/blob/main/resources/hello_world.lua" download>hello_world.lua (toggle window with Ctrl+I)</a></li>
+      <li><a href="https://github.com/Sorky96/OtClientModules_documentation/blob/main/resources/hello_world.otui" download>hello_world.otui (HelloWindow layout)</a></li>
+      <li><a href="https://github.com/Sorky96/OtClientModules_documentation/blob/main/resources/hello_world.otmod" download>hello_world.otmod (module descriptor)</a></li>
+    </ul>
   <h3>Attribute Reference</h3>
   <p>These are the most commonly used attributes across OTUI widget types.</p>
 

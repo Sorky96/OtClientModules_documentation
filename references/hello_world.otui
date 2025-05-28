@@ -1,0 +1,12 @@
+HelloWindow < MainWindow
+  id: HelloWindow
+  size: 200 100
+  text: "Hello"
+  draggable: true
+  visible: true
+
+  Label
+    id: HelloLabel
+    anchors.centerIn: parent
+    text: "Hello, World!"
+    font: verdana-11px-rounded

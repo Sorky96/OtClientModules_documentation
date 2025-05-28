@@ -1,0 +1,11 @@
+Module:
+  name: "hello_world"
+  description: "Simple Hello World module"
+  author: "YourName"
+  sandboxed: true
+  scripts: [ "hello_world.lua" ]  
+  otuis: [ "hello_world.otui" ]
+  autoload: true
+  autoload-priority: 1001
+  @onLoad: init()
+  @onUnload: terminate()
