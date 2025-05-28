@@ -168,6 +168,74 @@ end</code></pre>
   </ul>
 </div>
 <div class="section">
+  <h2>Lifecycle Events in OTMod</h2>
+  <p>Besides <code>@onLoad</code> and <code>@onUnload</code>, some OTClient forks support additional lifecycle hooks. These control what happens during loading, unloading, focusing, and reloading modules.</p>
+
+  <h3>Standard Events</h3>
+  <pre><code>@onLoad: init         -- Called when the module is loaded
+@onUnload: terminate   -- Called when the module is unloaded</code></pre>
+
+  <h3>Optional Events (Client-dependent)</h3>
+  <pre><code>@onReload: refreshUI     -- Called when module is reloaded manually
+@onFocus: handleFocus     -- Called when the module UI is focused
+@onBlur: handleBlur       -- Called when the module UI is unfocused</code></pre>
+
+  <p><strong>Note:</strong> These additional events are supported in some forks like OTCv8, but not guaranteed in all versions. Always test for compatibility with your specific client build.</p>
+</div>
+<div class="section">
+  <h2>Deeper Dive Into OTUI Features</h2>
+
+  <h3>Widget Inheritance</h3>
+  <p>You can define reusable widget styles using inheritance. This lets you apply common properties across multiple widgets.</p>
+  <pre><code>MyCustomLabel < Label
+  color: #FF0000
+  font: verdana-11px-rounded</code></pre>
+
+  <p>Then, use this custom style in your layout:</p>
+  <pre><code>MyCustomLabel
+  id: warningText
+  text: "Warning: Something went wrong!"</code></pre>
+
+  <h3>Nested Layouts</h3>
+  <p>You can nest containers and use layout managers to create complex UIs:</p>
+  <pre><code>Panel
+  id: mainPanel
+  layout: verticalBox
+  spacing: 4
+
+  Label
+    text: "Player Stats"
+
+  Panel
+    id: gridPanel
+    layout: grid
+    cell-size: 50 20
+    spacing: 2
+
+    Label
+      text: "Health"
+
+    ProgressBar
+      id: healthBar
+      value: 75</code></pre>
+
+  <h3>Conditional Visibility from Lua</h3>
+  <p>Widgets can be shown or hidden dynamically from your Lua logic:</p>
+  <pre><code>local myWidget = rootWidget:getChildById("premiumPanel")
+myWidget:setVisible(player:isPremium())</code></pre>
+
+  <p>This allows you to show certain UI elements only for premium users, quest progress, etc.</p>
+</div>
+
+<h2>Common Mistakes & Troubleshooting</h2>
+<ul>
+  <li>Widgets not appearing? Check <code>g_ui.loadUI</code> path and parent widget.</li>
+  <li>Getting <code>nil</code> from <code>getChildById</code>? Ensure the <code>id</code> is spelled correctly and the widget is loaded.</li>
+  <li>Opcode not firing? Make sure it’s registered before <code>g_game</code> connects.</li>
+</ul>
+
+
+<div class="section">
     <h2>Advanced Tips & Tricks</h2>
     <p><strong>Note on .lua Extensions in .otmod Files:</strong> In classic OTClient, script filenames in the <code>scripts:</code> array <em>must</em> include the <code>.lua</code> extension. However, in modern forks like <code>OTCv8</code>, the client automatically appends <code>.lua</code> if it's missing. Example:</p>
     <pre><code>scripts: ["example.lua"]     -- always works
