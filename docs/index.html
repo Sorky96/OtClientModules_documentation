@@ -5,21 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Complete Guide to Creating OTClient Modules</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; background-color: #f4f4f4; color: #222; }
+    body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; background-color: #f4f4f4; color: #222; transition: background-color 0.3s, color 0.3s; }
     h1, h2, h3 { color: #005072; }
     code, pre { background: #eee; padding: 2px 4px; border-radius: 4px; }
     pre { padding: 1em; overflow-x: auto; border-left: 4px solid #005072; }
     .section { margin-bottom: 3em; }
-	a.download {
-		display: inline-block;
-		background: #005072;
-		color: white;
-		padding: 0.5em 1em;
-		border-radius: 5px;
-		text-decoration: none;
-	}
+    a { color: #005072; text-decoration: none; }
+    a:hover { text-decoration: underline; }
     .dark-mode body { background-color: #1e1e1e; color: #ddd; }
     .dark-mode code, .dark-mode pre { background: #2a2a2a; border-left-color: #3399ff; }
+    .dark-mode a { color: #66ccff; }
+    .dark-mode a:hover { color: #99ddff; text-decoration: underline; }
     #toggle-dark { position: fixed; top: 1rem; right: 1rem; padding: 0.5em 1em; cursor: pointer; background-color: #005072; color: white; border: none; border-radius: 4px; }
   </style>
 </head>
@@ -41,7 +37,6 @@
     <li><a href="#otmod">OTMod File</a></li>
     <li><a href="#lua">Lua File</a></li>
     <li><a href="#otui">OTui File</a></li>
-    <li><a href="#attributesReference">Attributes reference</a></li>
     <li><a href="#attributesReference">Attributes reference</a></li>
     <li><a href="#lifecycleOfEvent">Lifecycle of events</a></li>
     <li><a href="#deeperDive">Deeper Dive Into OTUI Features</a></li>
