@@ -18,10 +18,19 @@
 		border-radius: 5px;
 		text-decoration: none;
 	}
-
+    .dark-mode body { background-color: #1e1e1e; color: #ddd; }
+    .dark-mode code, .dark-mode pre { background: #2a2a2a; border-left-color: #3399ff; }
+    #toggle-dark { position: fixed; top: 1rem; right: 1rem; padding: 0.5em 1em; cursor: pointer; background-color: #005072; color: white; border: none; border-radius: 4px; }
   </style>
 </head>
 <body>
+  <button id="toggle-dark">Toggle Dark Mode</button>
+  <script>
+    document.getElementById('toggle-dark').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark-mode');
+    });
+  </script>
+
   <h1>Complete Guide to Creating OTClient Modules</h1>
 
 <nav>
