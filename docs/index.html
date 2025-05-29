@@ -24,13 +24,30 @@
 <body>
   <h1>Complete Guide to Creating OTClient Modules</h1>
 
+<nav>
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#what-are-modules">What Are Modules?</a></li>
+    <li><a href="#folder-structure">Folder Structure</a></li>
+    <li><a href="#otmod">OTMod File</a></li>
+    <li><a href="#lua">Lua File</a></li>
+    <li><a href="#otui">OTui File</a></li>
+    <li><a href="#attributesReference">Attributes reference</a></li>
+    <li><a href="#attributesReference">Attributes reference</a></li>
+    <li><a href="#lifecycleOfEvent">Lifecycle of events</a></li>
+    <li><a href="#deeperDive">Deeper Dive Into OTUI Features</a></li>
+    <li><a href="#tipsAndTricks">Advanced Tips & Tricks</a></li>
+  </ul>
+</nav>
+
+
   <div class="section">
-    <h2>What Are OTClient Modules?</h2>
+    <h2 id="what-are-modules">What Are OTClient Modules?</h2>
     <p>Modules in OTClient (OTC) are self-contained folders containing Lua logic and UI definition files (.lua and .otui) that extend the game's client functionality. Examples include hotkey bars, health trackers, battle lists, and custom UIs.</p>
   </div>
 
   <div class="section">
-    <h2>Folder Structure</h2>
+    <h2 id="folder-structure">Folder Structure</h2>
     <pre><code>modules/
   hello_world/
     hello_world.lua
@@ -40,7 +57,7 @@
   </div>
 
   <div class="section">
-    <h2>OTMod File (.otmod)</h2>
+    <h2 id ="otmod">OTMod File (.otmod)</h2>
     <p>Every module must include a <code>.otmod</code> file which defines its metadata and how it integrates with the client.</p>
     <p><strong>Important:</strong> Some forks of OTClient require OTUI files to be listed under the <code>scripts:</code> array to ensure they are loaded. Always test if your <code>.otui</code> files need to be explicitly listed in <code>.otmod</code>.</p>
     <pre><code>name: "hello_world"                 -- Name of the module
@@ -56,7 +73,7 @@ autoload-priority: 1001            -- Load order priority
   </div>
 
   <div class="section">
-    <h2>Lua Logic File (hello_world.lua)</h2>
+    <h2 id="lua">Lua Logic File (hello_world.lua)</h2>
     <p>This script binds Ctrl+I to toggle a small window with a Hello World message:</p>
     <pre><code>local window = nil                 -- Global reference to the window
 local hotkey = nil                -- Reference to the bound hotkey
@@ -94,7 +111,7 @@ end</code></pre>
   </div>
 
   <div class="section">
-    <h2>OTUI File (hello_world.otui)</h2>
+    <h2 id="otui">OTUI File (hello_world.otui)</h2>
     <p>This defines a simple window named <code>HelloWindow</code> with a label inside it:</p>
     <pre><code>HelloWindow < MainWindow        -- Inherit from MainWindow style
   id: HelloWindow               -- ID used in Lua
@@ -118,7 +135,7 @@ end</code></pre>
     </ul>
 	 <img src="https://github.com/Sorky96/OtClientModules_documentation/blob/main/resources/WorkingModule.png?raw=true" alt="Module preview"> 
 	 
-  <h3>Attribute Reference</h3>
+  <h3 id="attributesReference">Attribute Reference</h3>
   <p>These are the most commonly used attributes across OTUI widget types.</p>
 
   <h4>Common Attributes</h4>
@@ -178,7 +195,7 @@ end</code></pre>
   </ul>
 </div>
 <div class="section">
-  <h2>Lifecycle Events in OTMod</h2>
+  <h2 id="lifecycleOfEvent">Lifecycle Events in OTMod</h2>
   <p>Besides <code>@onLoad</code> and <code>@onUnload</code>, some OTClient forks support additional lifecycle hooks. These control what happens during loading, unloading, focusing, and reloading modules.</p>
 
   <h3>Standard Events</h3>
@@ -193,7 +210,7 @@ end</code></pre>
   <p><strong>Note:</strong> These additional events are supported in some forks like OTCv8, but not guaranteed in all versions. Always test for compatibility with your specific client build.</p>
 </div>
 <div class="section">
-  <h2>Deeper Dive Into OTUI Features</h2>
+  <h2 id="deeperDive">Deeper Dive Into OTUI Features</h2>
 
   <h3>Widget Inheritance</h3>
   <p>You can define reusable widget styles using inheritance. This lets you apply common properties across multiple widgets.</p>
@@ -246,7 +263,7 @@ myWidget:setVisible(player:isPremium())</code></pre>
 
 
 <div class="section">
-    <h2>Advanced Tips & Tricks</h2>
+    <h2 id="tipsAndTricks">Advanced Tips & Tricks</h2>
     <p><strong>Note on .lua Extensions in .otmod Files:</strong> In classic OTClient, script filenames in the <code>scripts:</code> array <em>must</em> include the <code>.lua</code> extension. However, in modern forks like <code>OTCv8</code>, the client automatically appends <code>.lua</code> if it's missing. Example:</p>
     <pre><code>scripts: ["example.lua"]     -- always works
 scripts: ["example"]         -- works only in OTCv8 and similar forks</code></pre>
