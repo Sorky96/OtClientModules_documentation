@@ -1,4 +1,3 @@
-
 const cm = CodeMirror.fromTextArea(document.getElementById("editor"), {
   mode: "toml",
   theme: "default",
@@ -7,13 +6,19 @@ const cm = CodeMirror.fromTextArea(document.getElementById("editor"), {
 
 const initialCode = `MainWindow
   id: "main"
-  size: [300, 100]
+  size: [320, 180]
 
   Label
-    id: "label"
-    text: "Hello"
-    margin-top: 10
-    margin-left: 20`;
+    id: "title"
+    text: "Pseudo-OTUI preview"
+    margin-top: 8
+    margin-left: 12
+
+  Button
+    id: "okButton"
+    text: "OK"
+    margin-top: 16
+    margin-left: 12`;
 
 cm.setValue(initialCode);
 window._initialOTUI = initialCode;
