@@ -37,11 +37,20 @@
     <li><a href="#otmod">OTMod File</a></li>
     <li><a href="#lua">Lua File</a></li>
     <li><a href="#otui">OTui File</a></li>
+<<<<<<< codex/update-href-attributes-to-match-ids
     <li><a href="#attributes-reference">Attributes reference</a></li>
     <li><a href="#lifecycle-of-events">Lifecycle of events</a></li>
     <li><a href="#deeper-dive">Deeper Dive Into OTUI Features</a></li>
     <li><a href="#tips-and-tricks">Advanced Tips & Tricks</a></li>
     <li><a href="#opcodes">Using Extended Opcodes</a></li>
+=======
+    <li><a href="#attributesReference">Attributes reference</a></li>
+    <li><a href="#lifecycleOfEvent">Lifecycle of events</a></li>
+    <li><a href="#deeperDive">Deeper Dive Into OTUI Features</a></li>
+    <li><a href="#tipsAndTricks">Advanced Tips & Tricks</a></li>
+    <li><a href="#opCodes">Using Extended Opcodes</a></li>
+    <li><a href="#mehahCompatibility">mehah fork compatibility</a></li>
+>>>>>>> main
   </ul>
 </nav>
 
@@ -65,6 +74,7 @@
     <h2 id="otmod">OTMod File (.otmod)</h2>
     <p>Every module must include a <code>.otmod</code> file which defines its metadata and how it integrates with the client.</p>
     <p><strong>Important:</strong> Some forks of OTClient require OTUI files to be listed under the <code>scripts:</code> array to ensure they are loaded. Always test if your <code>.otui</code> files need to be explicitly listed in <code>.otmod</code>.</p>
+    <p><strong>Compatibility clarification:</strong> This guide does not treat that "some forks" statement as a confirmed mehah requirement. For mehah, mark it as <strong>unknown until validated</strong> in your specific build.</p>
     <pre><code>name: "hello_world"                 -- Name of the module
 description: "Displays a Hello World message on Ctrl+I"  -- Description
 author: "Your Name"                -- Who created it
@@ -212,7 +222,7 @@ end</code></pre>
 @onFocus: handleFocus     -- Called when the module UI is focused
 @onBlur: handleBlur       -- Called when the module UI is unfocused</code></pre>
 
-  <p><strong>Note:</strong> These additional events are supported in some forks like OTCv8, but not guaranteed in all versions. Always test for compatibility with your specific client build.</p>
+  <p><strong>Note:</strong> These additional events are supported in some forks like OTCv8, but not guaranteed in all versions. For mehah compatibility in this documentation, this is <strong>unknown</strong> until directly tested on the target build.</p>
 </div>
 <div class="section">
   <h2 id="deeper-dive">Deeper Dive Into OTUI Features</h2>
@@ -284,6 +294,82 @@ scripts: ["example"]         -- works only in OTCv8 and similar forks</code></pr
       <li>Leverage <code>UICreature</code> or <code>UIItem</code> for creature/item previews and inventory widgets.</li>
     </ul>
   </div>
+
+<div class="section">
+  <h2 id="mehahCompatibility">mehah fork compatibility</h2>
+  <p>The table below links each feature to a concrete module API area and states current compatibility confidence for mehah fork.</p>
+
+  <table border="1" cellspacing="0" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Status</th>
+        <th>API area reference</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Module lifecycle hooks (<code>@onLoad</code>, <code>@onUnload</code>)</td>
+        <td>supported</td>
+        <td><code>.otmod</code> lifecycle hooks</td>
+        <td>Core module load/unload path, expected baseline behavior on mehah.</td>
+      </tr>
+      <tr>
+        <td>Optional lifecycle hooks (<code>@onReload</code>, <code>@onFocus</code>, <code>@onBlur</code>)</td>
+        <td>unknown</td>
+        <td><code>.otmod</code> lifecycle hooks</td>
+        <td>Previously described as available in “some forks”; in this guide this is not confirmed for mehah.</td>
+      </tr>
+      <tr>
+        <td>OTUI declaration in descriptor (<code>otuis: [...]</code>)</td>
+        <td>supported</td>
+        <td><code>.otmod</code> + OTUI/scripts loading</td>
+        <td>Prefer explicit OTUI registration for stable packaging across forks, including mehah.</td>
+      </tr>
+      <tr>
+        <td>Skipping <code>.lua</code> extension in <code>scripts</code></td>
+        <td>unknown</td>
+        <td><code>.otmod</code> script loader</td>
+        <td>Documented here for OTCv8-like clients only; mehah behavior requires direct test.</td>
+      </tr>
+      <tr>
+        <td>UI loading with <code>g_ui.loadUI</code> / <code>g_ui.importStyle</code></td>
+        <td>supported</td>
+        <td>OTUI/scripts integration</td>
+        <td>Standard module API flow.</td>
+      </tr>
+      <tr>
+        <td>Hotkeys with <code>g_keyboard.bindKeyPress</code></td>
+        <td>supported</td>
+        <td>Hotkeys API</td>
+        <td>Bind in init and unbind in terminate for safe reload behavior.</td>
+      </tr>
+      <tr>
+        <td>Extended opcodes (<code>ProtocolGame.registerExtendedOpcode</code>, <code>g_game.sendExtendedOpcode</code>)</td>
+        <td>partial</td>
+        <td>Extended opcodes API</td>
+        <td>Client-side API is present; production behavior also depends on server-side opcode scripts.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Clarification of prior “some forks” wording</h3>
+  <ul>
+    <li>"Some forks support additional lifecycle hooks" → <strong>mehah: unknown</strong> (must be tested on your build).</li>
+    <li>"OTCv8 and similar forks can skip <code>.lua</code>" → <strong>mehah: unknown</strong> unless confirmed by tests.</li>
+  </ul>
+
+  <h3>Before shipping module on mehah client</h3>
+  <ul>
+    <li>[ ] Keep full <code>.lua</code> filenames in <code>scripts:</code>.</li>
+    <li>[ ] Keep every OTUI file explicitly listed in module descriptor metadata.</li>
+    <li>[ ] Validate lifecycle hooks actually triggered in your mehah target build.</li>
+    <li>[ ] Verify hotkeys bind/unbind cleanly across reload and relog.</li>
+    <li>[ ] Verify extended opcode request/response with production-like server scripts.</li>
+    <li>[ ] Restart client and ensure no leftover widgets or keybinds remain.</li>
+  </ul>
+</div>
 
 <div class="section">
   <h2 id="opcodes">Using Extended Opcodes</h2>
