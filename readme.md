@@ -19,41 +19,53 @@ modules/
 
 ## OTMod File (.otmod)
 
-Every module must include a .otmod file which defines its metadata and how it integrates with the client. Below is an example with detailed comments:
+Every module must include a .otmod file which defines its metadata and how it integrates with the client.
+
+Reference source for this example (single maintenance location): `resources/hello_world.otmod`, `resources/hello_world.lua`, `resources/hello_world.otui`.
 
 ```
-Module
-  name: "Your Module"                -- Display name of the module
-  description: "Does something cool." -- Description shown in module manager
-  author: "Your Name"                -- Attribution field
-  sandboxed: true                    -- Restricts global access for safety
-  dependencies: [ ]                  -- List of other modules this one depends on
-  scripts: ["your_module.lua"]       -- Lua scripts to load (OTCv8 can skip .lua)
-  @onLoad: init()                    -- Lua function to call when module loads
-  @onUnload: terminate()             -- Lua function to call on unload
+Module:
+  name: "hello_world"
+  description: "Simple Hello World module"
+  author: "YourName"
+  sandboxed: true
+  scripts: [ "hello_world.lua" ]
+  otuis: [ "hello_world.otui" ]
+  autoload: true
+  autoload-priority: 1001
+  @onLoad: init()
+  @onUnload: terminate()
 ```
 
-Note: Modern forks like OTCv8 allow skipping .lua in script names, but it's recommended to always include it for compatibility.
+> Note: Fork differences are possible (classic/OTCv8/mehah), but the baseline example in this guide is one shared reference.
 
 ## Lua Logic File (your_module.lua)
 
 This script contains the core logic that runs when your module is loaded or unloaded. The functions init() and terminate() are defined in your .otmod file and will be executed by the OTClient framework.
 
-```
-function init()
-  -- Load the UI layout defined in your_module.otui
-  g_ui.loadUI("your_module.otui")
+```lua
+local window = nil
+local hotkey = nil
 
-  -- Create a MainWindow widget and attach it to the root interface
-  myWindow = g_ui.createWidget("MainWindow", rootWidget)
+function init()
+  -- Import base and custom styles
+	g_ui.importStyle('hello_world.otui')
+	window = g_ui.createWidget('HelloWindow', rootWidget)
+    window:hide()
+  -- Bind Ctrl+I to show the window
+  hotkey = g_keyboard.bindKeyPress('Ctrl+I', function()
+    toggleHelloWindow()
+  end)
 end
 
 function terminate()
-  -- Always clean up your widgets when unloading the module
-  -- This ensures there are no memory leaks or duplicated windows
-  if myWindow then
-    myWindow:destroy()  -- Destroy removes the widget from memory
-    myWindow = nil      -- Unset the reference to help garbage collection
+  if window then
+    window:destroy()
+    window = nil
+  end
+  if hotkey then
+    g_keyboard.unbindKeyPress('Ctrl+I')
+    hotkey = nil
   end
 end
 ```
@@ -74,23 +86,22 @@ Explanation:
 
 OTUI files define the visual layout and styling of widgets using a custom markup format. Below is an example layout with inline comments.
 
-```
-MainWindow                             -- Main container window with title bar and close button
-  id: myWindow                          -- ID to reference this widget from Lua
-  size: 300 200                         -- Width and height
-  text: "My Example"                   -- Window title
-  @onClick: function()                 -- Click handler using inline Lua
-    g_logger.info("Clicked window")
-  end
+```otui
+HelloWindow < MainWindow
+  id: HelloWindow
+  size: 200 100
+  text: "Hello"
+  draggable: true
+  visible: true
 
-  Button                               -- A child widget (indented under MainWindow)
-    id: closeButton                    -- Button's unique ID
-    text: "Close"                      -- Label on the button
-    anchors.bottom: parent.bottom     -- Anchor this button to bottom of parent
-    @onClick: function()               -- On click, close the parent window
-      myWindow:destroy()
-    end
+  Label
+    id: HelloLabel
+    anchors.centerIn: parent
+    text: "Hello, World!"
+    font: verdana-11px-rounded
 ```
+
+> Note: Fork differences are possible (classic/OTCv8/mehah), but this OTUI snippet stays aligned with the same baseline reference.
 
 ### Attribute Reference
 
@@ -264,3 +275,8 @@ Tips:
 - Use a unique opcode ID (between 1–255) to avoid conflicts
 
 - Consider using JSON.stringify / decode for structured messages
+
+## Compatibility notes
+
+- Single maintenance location for baseline snippets: `resources/hello_world.otmod`, `resources/hello_world.lua`, `resources/hello_world.otui`.
+- Differences between OTC forks (classic/OTCv8/mehah) are possible; if behavior differs, keep these resource files as the canonical baseline and add fork-specific notes around them.

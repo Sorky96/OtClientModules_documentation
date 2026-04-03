@@ -64,53 +64,47 @@
   <div class="section">
     <h2 id ="otmod">OTMod File (.otmod)</h2>
     <p>Every module must include a <code>.otmod</code> file which defines its metadata and how it integrates with the client.</p>
-    <p><strong>Important:</strong> Some forks of OTClient require OTUI files to be listed under the <code>scripts:</code> array to ensure they are loaded. Always test if your <code>.otui</code> files need to be explicitly listed in <code>.otmod</code>.</p>
-    <pre><code>name: "hello_world"                 -- Name of the module
-description: "Displays a Hello World message on Ctrl+I"  -- Description
-author: "Your Name"                -- Who created it
-sandboxed: true                    -- Restricts global access
-otuis: [ "hello_world.otui" ]      -- Better provide it here, otherwise you might have problems with styles
-scripts: ["hello_world.lua"]        -- Lua files to load
-autoload: true                     -- Load automatically
-autoload-priority: 1001            -- Load order priority
-@onLoad: init                      -- Lua function to run on load
-@onUnload: terminate               -- Lua function to run on unload</code></pre>
+    <p><strong>Reference source for this example (single maintenance location):</strong> <code>resources/hello_world.otmod</code>, <code>resources/hello_world.lua</code>, <code>resources/hello_world.otui</code>.</p>
+    <pre><code>Module:
+  name: "hello_world"
+  description: "Simple Hello World module"
+  author: "YourName"
+  sandboxed: true
+  scripts: [ "hello_world.lua" ]
+  otuis: [ "hello_world.otui" ]
+  autoload: true
+  autoload-priority: 1001
+  @onLoad: init()
+  @onUnload: terminate()</code></pre>
+    <p><strong>Note:</strong> Fork differences are possible (classic/OTCv8/mehah), but the baseline example in this guide is one shared reference.</p>
   </div>
 
   <div class="section">
     <h2 id="lua">Lua Logic File (hello_world.lua)</h2>
     <p>This script binds Ctrl+I to toggle a small window with a Hello World message:</p>
-    <pre><code>local window = nil                 -- Global reference to the window
-local hotkey = nil                -- Reference to the bound hotkey
+    <pre><code>local window = nil
+local hotkey = nil
 
 function init()
-  g_ui.importStyle('hello_world.otui')         -- Load UI style definition
-  window = g_ui.createWidget('HelloWindow', rootWidget) -- Create the widget
-  window:hide()                                -- Start hidden
+  -- Import base and custom styles
+	g_ui.importStyle('hello_world.otui')
+	window = g_ui.createWidget('HelloWindow', rootWidget)
+    window:hide()
 
-  hotkey = g_keyboard.bindKeyPress('Ctrl+I', function() -- Bind Ctrl+I
+  -- Bind Ctrl+I to show the window
+  hotkey = g_keyboard.bindKeyPress('Ctrl+I', function()
     toggleHelloWindow()
   end)
 end
 
 function terminate()
   if window then
-    window:destroy()             -- Remove the window
+    window:destroy()
     window = nil
   end
   if hotkey then
-    g_keyboard.unbindKeyPress('Ctrl+I') -- Unbind hotkey
+    g_keyboard.unbindKeyPress('Ctrl+I')
     hotkey = nil
-  end
-end
-
-function toggleHelloWindow()
-  if window and window:isVisible() then
-    window:hide()                -- Hide if visible
-  else
-    window:show()                -- Show if hidden
-    window:raise()               -- Bring to front
-    window:focus()               -- Focus it
   end
 end</code></pre>
   </div>
@@ -118,19 +112,19 @@ end</code></pre>
   <div class="section">
     <h2 id="otui">OTUI File (hello_world.otui)</h2>
     <p>This defines a simple window named <code>HelloWindow</code> with a label inside it:</p>
-    <pre><code>HelloWindow < MainWindow        -- Inherit from MainWindow style
-  id: HelloWindow               -- ID used in Lua
-  size: 200 100                 -- Width and height
-  text: "Hello"                -- Window title
-  draggable: true              -- Allow window to be dragged
-  visible: false               -- Start hidden
+    <pre><code>HelloWindow < MainWindow
+  id: HelloWindow
+  size: 200 100
+  text: "Hello"
+  draggable: true
+  visible: true
 
-  Label                        -- Child label inside window
-    id: HelloLabel             -- Label ID
-    anchors.centerIn: parent  -- Center in window
-    text: "Hello, World!"     -- Text displayed
-    color: #00A               -- Text color
-    font: verdana-11px-rounded -- Font style</code></pre>
+  Label
+    id: HelloLabel
+    anchors.centerIn: parent
+    text: "Hello, World!"
+    font: verdana-11px-rounded</code></pre>
+    <p><strong>Note:</strong> Fork differences are possible (classic/OTCv8/mehah), but this OTUI snippet stays aligned with the same baseline reference.</p>
   </div>
     <p>Download a working example module:</p>
     <ul>
@@ -343,4 +337,12 @@ end
     <li>Consider using JSON.stringify / decode for structured messages</li>
   </ul>
 </div>
+<div class="section">
+  <h2 id="compatibility-notes">Compatibility notes</h2>
+  <ul>
+    <li>Single maintenance location for baseline snippets: <code>resources/hello_world.otmod</code>, <code>resources/hello_world.lua</code>, <code>resources/hello_world.otui</code>.</li>
+    <li>Differences between OTC forks (classic/OTCv8/mehah) are possible; if behavior differs, keep these resource files as the canonical baseline and add fork-specific notes around them.</li>
+  </ul>
+</div>
+</body>
 </html>
