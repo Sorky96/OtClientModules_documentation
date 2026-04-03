@@ -35,6 +35,8 @@ Module
 
 Note: Modern forks like OTCv8 allow skipping .lua in script names, but it's recommended to always include it for compatibility.
 
+Compatibility clarification: this OTCv8-specific shortcut is not documented here as a confirmed mehah behavior, so treat mehah support for extension-less script names as **unknown** until you test it in your target build.
+
 ## Lua Logic File (your_module.lua)
 
 This script contains the core logic that runs when your module is loaded or unloaded. The functions init() and terminate() are defined in your .otmod file and will be executed by the OTClient framework.
@@ -198,6 +200,34 @@ For maximum compatibility across clients, always include the full filename with 
 - Use g_keyboard.bindKeyPress in Lua to create custom hotkeys inside your modules.
 
 - Leverage UICreature or UIItem for creature/item previews and inventory widgets.
+
+## mehah fork compatibility
+
+The table below maps common module capabilities to their API area and current compatibility signal for **mehah fork**.
+
+| Feature | Status | API area reference | Notes |
+| --- | --- | --- | --- |
+| Module lifecycle hooks (`@onLoad`, `@onUnload`) | supported | `.otmod` lifecycle hooks | Core loading/unloading flow is baseline module behavior and should work on mehah. |
+| Optional lifecycle hooks (`@onReload`, `@onFocus`, `@onBlur`) | unknown | `.otmod` lifecycle hooks | Previously described as available in “some forks”; in this guide that statement should be read as **not explicitly confirmed for mehah**. |
+| OTUI declaration in module descriptor (`otuis: [...]`) | supported | `.otmod` `otuis` + OTUI loading | Keep OTUI files listed explicitly for safer cross-fork behavior, including mehah packaging. |
+| Omitting `.lua` extension in `scripts` list | unknown | `.otmod` `scripts` loading | This shortcut is documented for OTCv8; mehah support is not confirmed in this repository docs. |
+| UI loading via `g_ui.loadUI` / `g_ui.importStyle` | supported | OTUI/scripts integration | Standard module UI flow; use explicit file names and deterministic load order. |
+| Hotkeys with `g_keyboard.bindKeyPress` | supported | Hotkeys API | Common module-level API usage; remember to unbind on terminate. |
+| Extended opcodes (`ProtocolGame.registerExtendedOpcode`, `g_game.sendExtendedOpcode`) | partial | Extended opcodes API | Client API is available in module examples, but end-to-end behavior depends on matching server implementation (e.g. TFS script registration). |
+
+### Clarification of earlier "some forks" wording
+
+- "Some forks support additional lifecycle hooks" → **mehah: unknown** (needs direct verification in your specific mehah client build).
+- "Works in OTCv8 and similar forks" (extension-less script names) → **mehah: unknown** unless confirmed by test.
+
+### Before shipping module on mehah client
+
+- [ ] Keep full `.lua` filenames inside `scripts:` (do not rely on implicit extension).
+- [ ] Keep `otuis:` entries explicit for every OTUI file used by the module.
+- [ ] Verify lifecycle callbacks you use (`@onLoad/@onUnload` mandatory, optional hooks tested manually).
+- [ ] Test hotkey bind/unbind behavior across relog/reload cycles.
+- [ ] Test extended opcode round-trip against your production server scripts.
+- [ ] Run a clean restart test to confirm no orphan widgets/hotkeys remain after unload.
 
 ## Using Extended Opcodes
 
